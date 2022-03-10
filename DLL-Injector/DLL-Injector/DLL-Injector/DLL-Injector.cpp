@@ -38,7 +38,7 @@ DWORD GetProcId(const char* procName)
 
 int main()
 {
-    const char* dllPath = "c:\\csgointernal\\Debug\\csgo.dll";
+    const char* dllPath = "C:\\Users\\reeve";
     const char* procName = "csgo.exe";
     // two slashes for character escape
 
