@@ -2,12 +2,28 @@
 #include <Windows.h>
 #include <iostream>
 #include <cmath>
+#include "trampoline.h"
+#include "includes.h"
 
 // Global Vars
 
-bool bRadar = false, bFlash = false, bT = false, bGlow = false, bRecoil = false, bAimbot = false;
+bool bRadar = false, bFlash = false, bT = false, bGlow = false, bRecoil = false, bAimbot = false, bEsp = false;
 
 double PI = 3.14159265358;
+
+float ViewMatrix[16];
+
+
+
+
+
+// DirectX9 and Dummy Setups
+void* d3d9Device[119]; // holds vtable 
+BYTE EndSceneBytes[7]{ 0 };
+tEndScene oEndScene = nullptr;
+// was extern [debug priority]
+extern LPDIRECT3DDEVICE9 pDevice = nullptr;
+
 
 // Structs
 
@@ -33,6 +49,7 @@ struct gameOffsets {
     DWORD m_vecViewOffset = 0x108;
     DWORD m_dwBoneMatrix = 0x26A8;
     DWORD dwClientState_MaxPlayer = 0x388;
+    DWORD dwViewMatrix = 0x4DC07C4;
 }offsets;
 
 struct values {
@@ -64,6 +81,97 @@ struct vector {
         if (x < 89) { x = -89;}
     }
 };
+
+struct Vec2 {
+    float x, y;
+};
+
+struct Vec3 {
+    float x, y, z;
+};
+
+struct Vec4 {
+    float x, y, z, w;
+};
+
+
+
+
+// ESP
+
+void updateViewMatrix() {
+    memcpy_s(&ViewMatrix, sizeof(ViewMatrix), (PBYTE*)(val.gameModule + offsets.dwViewMatrix), sizeof(ViewMatrix));
+}
+
+bool checkEnt(DWORD entity) {
+    if (entity == NULL) {
+        return false;
+    }
+    if (entity == val.localPlayer) {
+        return false;
+    }
+    int entityHealth = *(int*)(entity + offsets.m_iHealth);
+    if (entityHealth <= 0) {
+        return false;
+    }
+    return true;
+}
+// converts 3d image to 2D drawing for ESP
+// fancy matrix math, tutorials on youtube !!!
+bool WorldToScreen(Vec3 pos, Vec2& screen) {
+    Vec4 clipcoords;
+    clipcoords.x = pos.x * ViewMatrix[0] + pos.y * ViewMatrix[1] + pos.z * ViewMatrix[2] + ViewMatrix[3];
+    clipcoords.y = pos.x * ViewMatrix[4] + pos.y * ViewMatrix[5] + pos.z * ViewMatrix[6] + ViewMatrix[7];
+    clipcoords.z = pos.x * ViewMatrix[8] + pos.y * ViewMatrix[9] + pos.z * ViewMatrix[10] + ViewMatrix[11];
+    clipcoords.w = pos.x * ViewMatrix[12] + pos.y * ViewMatrix[13] + pos.z * ViewMatrix[14] + ViewMatrix[15];
+
+    if (clipcoords.w < 0.1f) { // means its behind us
+        return false;
+    }
+
+    Vec3 NDC;
+    NDC.x = clipcoords.x / clipcoords.w;
+    NDC.y = clipcoords.y / clipcoords.w;
+    NDC.z = clipcoords.z / clipcoords.w;
+
+    screen.x = (windowWidth / 2 * NDC.x) + (NDC.x + windowWidth / 2);
+    // - just for special case in csgo
+    screen.y = -(windowHeight / 2 * NDC.y) + (NDC.y + windowHeight / 2);
+    return true;
+} 
+
+// Hook Function
+void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
+    if (!pDevice) {
+        pDevice = o_pDevice;
+    }
+    for (int i = 1; i < 32; i++) {
+        DWORD entity = *(DWORD*)(val.gameModule + offsets.entityList + i * 0x10);
+        if (checkEnt(entity)) {
+            std::cout << entity << std::endl;
+            int entTeam = *(int*)(entity + offsets.m_iTeamNum);
+            int localPlayerTeam = *(int*)(val.localPlayer + offsets.m_iTeamNum);
+            D3DCOLOR color = D3DCOLOR_ARGB(255, 0, 0, 0);
+            if (entTeam == localPlayerTeam) {
+                color = D3DCOLOR_ARGB(255, 0, 255, 0);
+            }
+            else {
+                color = D3DCOLOR_ARGB(255, 255, 0, 0);
+            }
+
+
+            Vec2 entPos2D;
+            // snapline
+            Vec3 currentEntVecOrigin = *(Vec3*)(entity + offsets.m_vecOrigin);
+            if (WorldToScreen(currentEntVecOrigin, entPos2D)) {
+                DrawLine(entPos2D.x, entPos2D.y, windowWidth / 2, windowHeight, 2, color);
+            }
+        }
+    }
+
+    oEndScene(pDevice);
+}
+
 
 
 // Triggerbot Functions
@@ -284,7 +392,6 @@ DWORD chooseTarget() {
 
 
 
-
 void pwn() {
     AllocConsole();
     freopen("CONOUT$", "w", stdout);
@@ -298,10 +405,9 @@ void pwn() {
     std::cout << "[NUMPAD6] TOGGLE AIMBOT" << std::endl;
 
 
-
-
     val.gameModule = (DWORD)GetModuleHandle("client.dll");
     val.engineModule = (DWORD)GetModuleHandle("engine.dll");
+
     
 
     val.localPlayer = *(DWORD*)(val.gameModule + offsets.lPlayer);
@@ -312,18 +418,19 @@ void pwn() {
     }
     std::cout << "Player Address: " << std::hex << val.localPlayer << std::endl;
 
-   
+    
     vector viewAngle = *(vector*)(*(DWORD*)(val.engineModule + offsets.dwClientState) + offsets.dwClientState_ViewAngles);
     vector origPunch = { 0,0,0 };
 
-
+    
 
     while (true) {
         {
             // bitwise flag for the bunnyhop
             val.flag = *(BYTE*)(val.localPlayer + offsets.flags);
-
-
+            // update view matrix for the esp
+            updateViewMatrix();
+            
             // CHANGE BOOLEANS BASED ON KEYS PRESSED 
 
             
@@ -358,6 +465,21 @@ void pwn() {
                 bAimbot = !bAimbot;
                 std::cout << "[AIMBOT ON]" << std::endl;
             }
+            if (GetAsyncKeyState(VK_NUMPAD7) & 1) {
+                bEsp = !bEsp;
+                // hook if true
+                if (bEsp) {
+                    if (GetD3D9Device(d3d9Device, sizeof(d3d9Device))) {
+                        // steal bytes from the Vtable for the end scene function
+                        memcpy(EndSceneBytes, (char*)d3d9Device[42], 7);
+                        // replaces 42nd entry of Vtable with our end scene function
+                        oEndScene = (tEndScene)TrampHook((char*)d3d9Device[42], (char*)hkEndScene, 7);
+                    }
+                }
+                if (!bEsp) {// restore to normal
+                    Patch((BYTE*)d3d9Device[42], EndSceneBytes, 7);
+                }
+            }
 
 
 
@@ -375,7 +497,6 @@ void pwn() {
                     if (bGlow) {
                         setGlow(entity);
                     }
-
                 }
             }
 

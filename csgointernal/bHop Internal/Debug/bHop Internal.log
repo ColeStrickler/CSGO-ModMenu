@@ -1,9 +1,11 @@
 ﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(514,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (bHop Internal.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   csgointernal.cpp
-C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(73,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(74,30): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(137,35): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(138,29): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(214,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(216,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(167,46): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(167,34): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(181,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(182,30): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(245,35): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(246,29): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(322,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Cole\Documents\C++\CS-GO\csgointernal\bHop Internal\csgointernal.cpp(324,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   bHop Internal.vcxproj -> C:\Users\Cole\Documents\C++\CS-GO\csgointernal\Debug\csgointernal.dll
