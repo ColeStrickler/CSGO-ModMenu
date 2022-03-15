@@ -1,4 +1,5 @@
-# Internal Mod Menu for CounterStrike Global Offensive
+# CSGO-ModMenu
+Internal Mod Menu for CounterStrike Global Offensive
 
 Please Note: The netvar offsets are subject to change with game updates and will need to be updated as well.
 
