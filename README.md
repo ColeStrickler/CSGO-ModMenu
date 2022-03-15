@@ -1,7 +1,7 @@
 # CSGO-ModMenu
 Internal Mod Menu for CounterStrike Global Offensive
 
-Please Note: The netvar offsets are subject to change with game updates and will need to be updated as well.
+Please Note: The netvar offsets are subject to change with game updates and will need to be updated over time.
 
 WARNING: I do not condone game hacking or cheating in online games, this project was done for learning purposes.
 
