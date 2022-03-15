@@ -8,3 +8,8 @@
 #include "dx.h"
 #include "trampoline.h"
 #include "draw.h"
+
+
+#define ABS(x) ((x < 0) ? (-x) : (x))
+#define TORAD(x) ((x) * 0.01745329252)
+
